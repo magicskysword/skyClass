@@ -71,6 +71,34 @@ print(a1.name,a1.age)
 张三    16
 ```
 
+### 类静态成员
+```lua
+require("class")
+
+---@class a
+a = class("a")
+
+a.MONEY = 0
+function a:ctor(name)
+
+end
+
+---@parm num number
+function a.AddMoney(num)
+    a.MONEY = a.MONEY + num
+end
+
+a.AddMoney(1000)
+local a1 = a:new()
+a1.AddMoney(1000)
+
+print(a.MONEY,a1.MONEY)
+```
+输出
+```
+2000    2000
+```
+
 ### 类继承
 
 ```lua
