@@ -188,7 +188,7 @@ print(a1.num,a2.num,a3.num)
 **注意**：由于元方法的定义不在对象上，因此使用访问符是无法获得元方法的。如果要获取元方法，请使用反射的方式获取
 
 ### 反射
-反射可以获取类的元属性，不过由于Lua本身的特性，很多反射方法其实可以直接完成，不需要借助反射方法<br/>
+反射可以获取类的元属性，不过由于Lua本身的特性，很多需求其实可以直接实现，不需要借助反射方法<br/>
 
 #### 反射 - 类
 ```lua
@@ -205,10 +205,10 @@ b.staticField = 1
 local c = class("c",a)
 c.staticField = 2
 
--- 反射类型创建 - 从名称
+-- 反射类型获取 - 从名称
 local aType = skyClass.classInfo.CreateByName("a")
 
--- 反射类型创建 - 从类
+-- 反射类型获取 - 从类
 local aType2 skyClass.classInfo.Create(a)
 print("aType == aType2：",aType == aType2)
 
