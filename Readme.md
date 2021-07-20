@@ -143,7 +143,7 @@ print(b1.name,b1.age,b1.money)
 李四    19      5000
 ```
 
-### 类元表定义
+### 元方法定义
 ```lua
 require("class")
 ---@class a
