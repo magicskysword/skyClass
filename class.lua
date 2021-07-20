@@ -1,9 +1,12 @@
-skyclass = {}
-setmetatable(skyclass, skyclass)
-
+local classes = {}
 
 local function _CreateClass(name, base)
     local classData = {}
+
+    assert(classes[name] == nil,
+    string.format("create class [%s] fail,it has been defined",name))
+    classes[name] = classData
+
     -- class info
     local classInfo = {}
     classData._classInfo = classInfo
@@ -12,6 +15,7 @@ local function _CreateClass(name, base)
     -- storge class's method and field
     local classMembers = {}
 
+    classInfo.class = classData
     classInfo.name = name
     classInfo.base = base
     classInfo.classMeta = classMeta
@@ -32,8 +36,6 @@ local function _CreateClass(name, base)
     function classInfo._GetClassMember(classType, key)
         if classMembers[key] ~= nil then
             return classMembers[key]
-        elseif classMeta[key] ~= nil then
-            return classMeta[key]
         else
             if classInfo.base then
                 local baseClassInfo = rawget(base, "_classInfo")
@@ -93,4 +95,105 @@ end
 function class(name, base)
     assert(type(name) == 'string', "class name is not a string.")
     return _CreateClass(name, base)
+end
+
+---@class skyClass
+skyClass = class("skyClass")
+local skyClass = skyClass
+skyClass.classes = classes
+
+---@class classInfo
+local classInfo = class("reflection")
+skyClass.classInfo = classInfo
+classInfo.cacheInfo = {}
+
+---* create a reflectionType by class
+---@param classType class
+---@return classInfo
+function classInfo.Create(classType)
+    if classInfo.cacheInfo[classType] then
+        return classInfo.cacheInfo[classType]
+    end
+    local self = classInfo:new()
+    self.bindClassInfo = rawget(classType,"_classInfo")
+    classInfo.cacheInfo[classType] = self
+    return self
+end
+
+---* create a reflectionType by name
+---@param name string
+---@return classInfo
+function classInfo.CreateByName(name)
+    return classInfo.Create(skyClass.classes[name])
+end
+
+---* get the true class
+---@return class
+function classInfo:getClass()
+    return self.bindClassInfo.class
+end
+
+---* get the class name
+---@return string
+function classInfo:getName()
+    return self.bindClassInfo.name
+end
+
+---* get the base class
+---@return class
+function classInfo:getBaseClass()
+    return self.bindClassInfo.base
+end
+
+---* get the base class's reflectionType
+---@return classInfo
+function classInfo:getBaseClassType()
+    return classInfo.Create(self.bindClassInfo.base)
+end
+
+---* get all subclasses
+---@return table<string,class>
+function classInfo:getSubClasses()
+    local t = {}
+    for key, value in pairs(self.bindClassInfo.subclasses) do
+        t[key] = value
+    end
+    return t
+end
+
+---* get all subclasses's reflectionType
+---@return table<string,class>
+function classInfo:getSubClassesType()
+    local t = {}
+    for key, value in pairs(self.bindClassInfo.subclasses) do
+        t[key] = classInfo.Create(value)
+    end
+    return t
+end
+
+---* get all class defined meta method
+---@return table
+function classInfo:getClassMetaMethods()
+    local t = {}
+    for key, value in pairs(self.bindClassInfo.classMeta) do
+        t[key] = value
+    end
+    return t
+end
+
+---* get all class static member
+---@return table
+function classInfo:getClassMember(memberName)
+    local t = self.bindClassInfo.classMembers
+    return t[memberName]
+end
+
+---* get all class static member
+---@return table
+function classInfo:getClassMembers()
+    local t = {}
+    for key, value in pairs(self.bindClassInfo.classMembers) do
+        t[key] = value
+    end
+    return t
 end

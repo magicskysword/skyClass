@@ -1,8 +1,7 @@
 require("class")
 
 local function Test()
-    local flag = true
-    local a = class("a")
+    local a = class("a4")
 
     a.MONEY = 0
     function a:new(name)
@@ -19,10 +18,11 @@ local function Test()
     a1.AddMoney(1000)
 
     if not (a.MONEY == 2000 and a1.MONEY == 2000) then
-        flag = false
+        print("Test 4-1 fail")
+        return false
     end
 
-    return flag
+    return true
 end
 
 return Test

@@ -1,9 +1,7 @@
 require("class")
 
 local function Test()
-    local flag = true;
-
-    local a = class("a")
+    local a = class("a1")
 
     function a:new(x)
         self.a = x
@@ -20,16 +18,18 @@ local function Test()
     a1.b = 3
     a2.b = 4
     if not (a1.a == 1 and a1.b == 3 and a2.a == 2 and a2.b == 4) then
-        flag = false
+        print("Test 1-1 fail")
+        return false
     end
 
     a1:add()
     a2:add()
     if not (a1.a == 4 and a2.a == 6) then
-        flag = false
+        print("Test 1-2 fail")
+        return false
     end
 
-    return flag
+    return true
 end
 
 return Test

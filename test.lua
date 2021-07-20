@@ -16,8 +16,9 @@ CheckTest("1-newClass")
 CheckTest("2-inherit")
 CheckTest("3-customMetaMethod")
 CheckTest("4-staticMember")
+CheckTest("5-reflection")
 
-print(string.format("共有 %d/%d 测试通过",testPass,testCount))
+print(string.format("共有 %d/%d 项测试通过",testPass,testCount))
 if testPass < testCount then
     local tip = "以下测试未通过："..table.concat(testNonPassList,",")
     print(tip)

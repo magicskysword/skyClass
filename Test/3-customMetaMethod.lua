@@ -1,9 +1,7 @@
 require("class")
 
 local function Test()
-    local flag = true;
-
-    local a = class("a")
+    local a = class("a3")
 
     function a:new()
         self.num = 0
@@ -21,10 +19,11 @@ local function Test()
     a2.num = 5
     local a3 = a1 + a2
     if a3.num ~= 15 then
-        flag = false
+        print("Test 3-1 fail")
+        return false
     end
 
-    local b = class("b",a)
+    local b = class("b3",a)
 
     function b:new()
         a.ctor(self)
@@ -36,7 +35,8 @@ local function Test()
     b2.num = 5
     local b3 = b1 + b2
     if b3.num ~= 15 then
-        flag = false
+        print("Test 3-2 fail")
+        return false
     end
 
     function b:__add(other)
@@ -46,10 +46,11 @@ local function Test()
     end
     local b4 = b1 + b2
     if b4.num ~= 20 then
-        flag = false
+        print("Test 3-3 fail")
+        return false
     end
 
-    return flag
+    return true
 end
 
 return Test

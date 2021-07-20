@@ -1,6 +1,9 @@
 # skyClass
 
-**skyClass**是`lua`的基于元表的`class`库
+**skyClass**是`lua`基于元表的`class`库
+
+## 编写版本
+lua5.3
 
 ## 功能：
 - [x] 构造函数<br>
@@ -10,7 +13,15 @@
 - [ ] 类型绑定<br>
 
 ## 提示
+
 该库加入了基于EmmyLua的类型注释，建议使用EmmyLua插件以获得较好的类型提示
+
+## License
+MIT
+
+## 快速使用
+
+将 `class.lua`复制到需要使用的lua库里，引用其即可。
 
 ## 使用方法
 
@@ -22,7 +33,7 @@
 ```lua
 require("class")
 
----@class a
+-- 创建类 a
 a = class("a")
 
 -- 构造函数
@@ -31,7 +42,7 @@ function a:new(name)
     self.age = 0
 end
 
--- 创建实例
+-- 创建实例a1,a2
 local a1 = a:new("张三")
 a1.age = 12
 local a2 = a:new("李四")
@@ -51,7 +62,6 @@ print(a2.name,a2.age)
 ```lua
 require("class")
 
----@class a
 a = class("a")
 
 function a:new(name)
@@ -59,8 +69,6 @@ function a:new(name)
     self.age = 0
 end
 
----* 自定义方法
----@param year number
 function a:grow(year)
     self.age = self.age + year
 end
@@ -82,7 +90,6 @@ print(a1.name,a1.age)
 ```lua
 require("class")
 
----@class a
 a = class("a")
 
 a.MONEY = 0
@@ -90,7 +97,6 @@ function a:new(name)
 
 end
 
----@param num number
 function a.AddMoney(num)
     a.MONEY = a.MONEY + num
 end
@@ -116,31 +122,24 @@ print(a.MONEY,a1.MONEY)
 ```lua
 require("class")
 
----@class a
 a = class("a")
 
----@param name string
 function a:new(name)
     self.name = name
     self.age = 0
 end
 
----@param year number
 function a:grow(year)
     self.age = self.age + year
 end
 
-local super
----@class b:a
 b = class("b",a)
 
----@param name string
 function b:new(name)
     a.ctor(self,name)
     self.money = 0
 end
 
----@param num number
 function b:earn(num)
     self.money = self.money + num
 end
@@ -187,3 +186,55 @@ print(a1.num,a2.num,a3.num)
 ```
 **注意**：不要覆盖`__index`与`__newindex`方法<br/>
 **注意**：由于元方法的定义不在对象上，因此使用访问符是无法获得元方法的。如果要获取元方法，请使用反射的方式获取
+
+### 反射
+反射可以获取类的元属性，不过由于Lua本身的特性，很多反射方法其实可以直接完成，不需要借助反射方法<br/>
+
+#### 反射 - 类
+```lua
+require("class")
+
+local a = class("a")
+a.staticField = 2
+function a.AddField(num)
+    a.staticField = a.staticField + num
+end
+
+local b = class("b",a)
+b.staticField = 1
+local c = class("c",a)
+c.staticField = 2
+
+-- 反射类型创建 - 从名称
+local aType = skyClass.classInfo.CreateByName("a")
+
+-- 反射类型创建 - 从类
+local aType2 skyClass.classInfo.Create(a)
+print("aType == aType2：",aType == aType2)
+
+-- 反射获取字段
+print("a.staticField：",aType:getClassMember("staticField"))
+
+-- 反射获取方法
+local AddField = aType:getClassMember("AddField")
+AddField(5)
+print("a.staticField：",a.staticField)
+
+local bType = skyClass.classInfo.Create(b)
+-- 反射获取父类
+bType:getBaseClass()
+
+-- 反射获取子类
+local aSubClasses = aType:getSubClasses()
+for key, value in pairs(aSubClasses) do
+    print("a的子类：",key,value.staticField)
+end
+```
+输出
+```
+aType == aType2：  false
+a.staticField：    2
+a.staticField：    7
+a的子类：           b       1
+a的子类：           c       2
+```
