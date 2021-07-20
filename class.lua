@@ -43,9 +43,15 @@ local function _CreateClass(name, base)
     end
 
     function classInfo._SetClassMember(classType, key, value)
-        if type(key) == "string" and string.sub(key, 1, 2) == "__" then
-            classMeta[key] = value
-            return
+        if type(key) == "string" then
+            if key == "new" then
+                classMembers["ctor"] = value
+                return
+            end
+            if string.sub(key, 1, 2) == "__" then
+                classMeta[key] = value
+                return
+            end
         end
 
         classMembers[key] = value

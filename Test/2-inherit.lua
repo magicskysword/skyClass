@@ -5,7 +5,7 @@ local function Test()
 
     local a = class("a")
 
-    function a:ctor()
+    function a:new()
         self.a = 1
         self.b = 2
     end
@@ -16,7 +16,7 @@ local function Test()
 
     local b = class("b",a)
 
-    function b:ctor()
+    function b:new()
         a.ctor(self)
         self.c = 10
     end
@@ -46,7 +46,7 @@ local function Test()
     end
 
     local c = class("c",b)
-    function c:ctor()
+    function c:new()
         b.ctor(self)
         self.c = 20
     end

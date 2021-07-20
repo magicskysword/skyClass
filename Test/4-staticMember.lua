@@ -5,7 +5,7 @@ local function Test()
     local a = class("a")
 
     a.MONEY = 0
-    function a:ctor(name)
+    function a:new(name)
 
     end
 

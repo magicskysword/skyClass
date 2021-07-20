@@ -5,7 +5,7 @@ local function Test()
 
     local a = class("a")
 
-    function a:ctor(x)
+    function a:new(x)
         self.a = x
         self.b = 2
     end

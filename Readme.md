@@ -16,6 +16,9 @@
 
 ### 创建类
 
+使用 `a = class("a")` 的方式来创建新的类
+使用 function a:new() 来定义构造函数
+
 ```lua
 require("class")
 
@@ -23,7 +26,7 @@ require("class")
 a = class("a")
 
 -- 构造函数
-function a:ctor(name)
+function a:new(name)
     self.name = name
     self.age = 0
 end
@@ -44,19 +47,20 @@ print(a2.name,a2.age)
 ```
 
 ### 类方法
+
 ```lua
 require("class")
 
 ---@class a
 a = class("a")
 
-function a:ctor(name)
+function a:new(name)
     self.name = name
     self.age = 0
 end
 
 ---* 自定义方法
----@pram year number
+---@param year number
 function a:grow(year)
     self.age = self.age + year
 end
@@ -72,6 +76,9 @@ print(a1.name,a1.age)
 ```
 
 ### 类静态成员
+
+直接在类上定义的函数与字段即为静态成员，静态成员可在类与对象里进行访问、调用。
+
 ```lua
 require("class")
 
@@ -79,7 +86,7 @@ require("class")
 a = class("a")
 
 a.MONEY = 0
-function a:ctor(name)
+function a:new(name)
 
 end
 
@@ -101,18 +108,24 @@ print(a.MONEY,a1.MONEY)
 
 ### 类继承
 
+使用 `b = class("b",a)` 来创建一个继承 `a` 类的 `b` 类<br/>
+子类的字段与方法会覆盖基类的字段与方法<br/>
+如果需要调用基类的字段与方法，直接使用 `a.field` 或 `a.method()` 即可<br/>
+如果需要调用基类的构造函数，使用 `a.ctor(self)` 来调用
+
 ```lua
 require("class")
 
 ---@class a
 a = class("a")
 
-function a:ctor(name)
+---@param name string
+function a:new(name)
     self.name = name
     self.age = 0
 end
 
----@pram year number
+---@param year number
 function a:grow(year)
     self.age = self.age + year
 end
@@ -121,12 +134,13 @@ local super
 ---@class b:a
 b = class("b",a)
 
-function b:ctor(name)
+---@param name string
+function b:new(name)
     a.ctor(self,name)
     self.money = 0
 end
 
----@pram num number
+---@param num number
 function b:earn(num)
     self.money = self.money + num
 end
@@ -144,12 +158,13 @@ print(b1.name,b1.age,b1.money)
 ```
 
 ### 元方法定义
+
 ```lua
 require("class")
 ---@class a
 a = class("a")
 
-function a:ctor()
+function a:new()
     self.num = 0
 end
 
@@ -170,4 +185,5 @@ print(a1.num,a2.num,a3.num)
 ```
 10      5       15
 ```
-**注意**：不要覆盖`__index`与`__newindex`方法
+**注意**：不要覆盖`__index`与`__newindex`方法<br/>
+**注意**：由于元方法的定义不在对象上，因此使用访问符是无法获得元方法的。如果要获取元方法，请使用反射的方式获取
