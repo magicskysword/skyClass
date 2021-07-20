@@ -83,7 +83,7 @@ function a:ctor(name)
 
 end
 
----@parm num number
+---@param num number
 function a.AddMoney(num)
     a.MONEY = a.MONEY + num
 end

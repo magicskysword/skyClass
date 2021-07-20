@@ -15,6 +15,7 @@ end
 CheckTest("1-newClass")
 CheckTest("2-inherit")
 CheckTest("3-customMetaMethod")
+CheckTest("4-staticMember")
 
 print(string.format("共有 %d/%d 测试通过",testPass,testCount))
 if testPass < testCount then
