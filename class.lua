@@ -97,7 +97,7 @@ local function _CreateClass(name, super)
     _AddSubClass(super, classData)
 
     setmetatable(classData, classData)
-    return classData, super
+    return classData
 end
 
 ---* Create a class

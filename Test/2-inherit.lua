@@ -14,10 +14,10 @@ local function Test()
         self.a = self.a + self.b
     end
 
-    local b ,superA = class("b",a)
+    local b = class("b",a)
 
     function b:ctor()
-        superA.ctor(self)
+        a.ctor(self)
         self.c = 10
     end
 
@@ -45,9 +45,9 @@ local function Test()
         flag = false
     end
 
-    local c,superB = class("c",b)
+    local c = class("c",b)
     function c:ctor()
-        superB.ctor(self)
+        b.ctor(self)
         self.c = 20
     end
 

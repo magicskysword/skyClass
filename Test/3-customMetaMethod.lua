@@ -24,10 +24,10 @@ local function Test()
         flag = false
     end
 
-    local b,superA = class("b",a)
+    local b = class("b",a)
 
     function b:ctor()
-        superA.ctor(self)
+        a.ctor(self)
     end
 
     local b1 = b:new()
