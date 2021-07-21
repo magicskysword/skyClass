@@ -61,9 +61,7 @@ local function _CreateClass(name, base)
 
     function classInfo._CreateInstance(classType, ...)
         local instance = {}
-        instance._instanceInfo = {
-            class = classType,
-        }
+        instance._classInfo = classInfo
 
         setmetatable(instance, classMeta)
 
@@ -103,11 +101,11 @@ local skyClass = skyClass
 skyClass.classes = classes
 
 ---@class classInfo
-local classInfo = class("reflection")
+local classInfo = class("skyClass.classInfo")
 skyClass.classInfo = classInfo
 classInfo.cacheInfo = {}
 
----* create a reflectionType by class
+---* create a classInfo by class
 ---@param classType class
 ---@return classInfo
 function classInfo.Create(classType)
@@ -120,7 +118,7 @@ function classInfo.Create(classType)
     return self
 end
 
----* create a reflectionType by name
+---* create a classInfo by class name
 ---@param name string
 ---@return classInfo
 function classInfo.CreateByName(name)
@@ -172,7 +170,7 @@ function classInfo:getSubClassesType()
 end
 
 ---* get all class defined meta method
----@return table
+---@return table<string,function|table>
 function classInfo:getClassMetaMethods()
     local t = {}
     for key, value in pairs(self.bindClassInfo.classMeta) do
@@ -181,11 +179,19 @@ function classInfo:getClassMetaMethods()
     return t
 end
 
----* get all class static member
----@return table
-function classInfo:getClassMember(memberName)
-    local t = self.bindClassInfo.classMembers
-    return t[memberName]
+---* get class meta method
+---@param name string meta method name
+---@return function|table
+function classInfo:getClassMetaMethod(name)
+    local t = self.bindClassInfo.classMeta
+    return t[name]
+end
+
+---* set class meta method
+---@param name string meta method name
+---@param value function|table meta method value
+function classInfo:setClassMetaMethod(name,value)
+    self.bindClassInfo.classMeta[name] = value
 end
 
 ---* get all class static member
@@ -195,5 +201,80 @@ function classInfo:getClassMembers()
     for key, value in pairs(self.bindClassInfo.classMembers) do
         t[key] = value
     end
+    return t
+end
+
+---* get class raw member
+---* the constructor's name is "ctor"
+---* can not get meta method,please use `getClassMetaMethod`
+---@param name any
+---@return any
+function classInfo:getClassMember(name)
+    return self.bindClassInfo.classMembers[name]
+end
+
+---* set class raw member
+---* the constructor's name is "ctor"
+---* can not set meta method,please use `setClassMetaMethod`
+---@param name any
+---@param value any
+function classInfo:setClassMember(name,value)
+    self.bindClassInfo.classMembers[name] = value
+end
+
+---@class instanceInfo
+local instanceInfo = class("skyClass.instanceInfo")
+skyClass.instanceInfo = instanceInfo
+instanceInfo.cacheInfo = {}
+-- set weak table,it can not effect gc
+setmetatable(instanceInfo.cacheInfo, {__mode = "kv"})
+
+---* create a instanceInfo by instance
+---@generic T : class
+---@param instance T
+---@return instanceInfo
+function instanceInfo.Create(instance)
+    if instanceInfo.cacheInfo[instance] then
+        return instanceInfo.cacheInfo[instance]
+    end
+    local self = instanceInfo:new()
+    self.bindClassInfo = rawget(instance,"_classInfo")
+    self.bindInstance = instance
+    instanceInfo.cacheInfo[instance] = self
+    return self
+end
+
+---* get class's info of instance
+---@return classInfo
+function instanceInfo:getClassInfo()
+    return classInfo.CreateByName(self.bindClassInfo.name)
+end
+
+---* get instance raw field
+---@param name any
+---@return any
+function instanceInfo:getField(name)
+    return rawget(self.bindInstance,name)
+end
+
+---* set instance raw field
+---@param name any
+---@param value any
+---@return any
+function instanceInfo:setField(name,value)
+    return rawset(self.bindInstance,name,value)
+end
+
+---* get instance all raw field
+---@param name any
+---@return any
+function instanceInfo:getAllField()
+    local t = {}
+    local curMeta = getmetatable(self.bindInstance)
+    setmetatable(self,nil)
+    for key, value in pairs(self.bindInstance) do
+        t[key] = value
+    end
+    setmetatable(self,curMeta)
     return t
 end

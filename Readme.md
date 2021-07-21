@@ -9,7 +9,7 @@ lua5.3
 - [x] 构造函数<br>
 - [x] 继承<br>
 - [x] 允许自定义元方法<br>
-- [ ] 简单反射<br>
+- [x] 简单反射<br>
 - [ ] 类型绑定<br>
 
 ## 提示
@@ -28,7 +28,7 @@ MIT
 ### 创建类
 
 使用 `a = class("a")` 的方式来创建新的类
-使用 function a:new() 来定义构造函数
+使用 `function a:new()` 来定义构造函数
 
 ```lua
 require("class")
@@ -56,6 +56,7 @@ print(a2.name,a2.age)
 张三    12
 李四    14
 ```
+**注意**：构造函数`new()`在定义时会被储存在`ctor()`中，而调用`a:new()`实际上是调用内置的实例构造方法，并在构造实例时调用当前类定义的`ctor()`
 
 ### 类方法
 
@@ -155,6 +156,8 @@ print(b1.name,b1.age,b1.money)
 ```
 李四    19      5000
 ```
+**注意**：父类的构造函数不会自动调用<br/>
+**注意**：千万不要使用`a.new(b)`，调用父类构造函数请使用`a.ctor(b)`<br/>
 
 ### 元方法定义
 
@@ -184,8 +187,11 @@ print(a1.num,a2.num,a3.num)
 ```
 10      5       15
 ```
-**注意**：不要覆盖`__index`与`__newindex`方法<br/>
-**注意**：由于元方法的定义不在对象上，因此使用访问符是无法获得元方法的。如果要获取元方法，请使用反射的方式获取
+**注意**：建议不要覆盖`__index`与`__newindex`方法<br/>
+**注意**：有特殊需求时建议保留原`__index`方法<br/>
+**注意**：使用`__`开头的方法会被视为元方法，元方法会被放到特殊的表中<br/>
+**注意**：由于元方法的定义不在对象上，因此使用访问符是无法获得元方法的。如果要获取元方法，请使用反射的方式获取<br/>
+**注意**：元方法在类继承时会进行全盘复制，因此请尽量不要在类定义结束后修改元方法
 
 ### 反射
 反射可以获取类的元属性，不过由于Lua本身的特性，很多需求其实可以直接实现，不需要借助反射方法<br/>
@@ -206,35 +212,82 @@ local c = class("c",a)
 c.staticField = 2
 
 -- 反射类型获取 - 从名称
-local aType = skyClass.classInfo.CreateByName("a")
+local aInfo = skyClass.classInfo.CreateByName("a")
 
 -- 反射类型获取 - 从类
-local aType2 skyClass.classInfo.Create(a)
-print("aType == aType2：",aType == aType2)
+local aInfo2 skyClass.classInfo.Create(a)
+print("aInfo == aInfo2：",aInfo == aInfo2)
+
+-- 从反射类型获取类
+print("a == aInfo:getClass()：",a == aInfo:getClass())
 
 -- 反射获取字段
-print("a.staticField：",aType:getClassMember("staticField"))
+print("a.staticField：",aInfo:getClassMember("staticField"))
 
 -- 反射获取方法
-local AddField = aType:getClassMember("AddField")
+local AddField = aInfo:getClassMember("AddField")
 AddField(5)
 print("a.staticField：",a.staticField)
 
-local bType = skyClass.classInfo.Create(b)
+local bInfo = skyClass.classInfo.Create(b)
 -- 反射获取父类
-bType:getBaseClass()
+bInfo:getBaseClass()
 
 -- 反射获取子类
-local aSubClasses = aType:getSubClasses()
+local aSubClasses = aInfo:getSubClasses()
 for key, value in pairs(aSubClasses) do
     print("a的子类：",key,value.staticField)
+end
+
+-- 反射获取元方法
+local metaMethods = aInfo:getClassMetaMethods()
+for key, value in pairs(metaMethods) do
+    print("a定义的元方法:",key)
 end
 ```
 输出
 ```
-aType == aType2：  false
-a.staticField：    2
-a.staticField：    7
-a的子类：           b       1
-a的子类：           c       2
+aInfo == aInfo2：       false
+a == aInfo:getClass()： true
+a.staticField： 2
+a.staticField： 7
+a的子类：        c       2
+a的子类：        b       1
+a定义的元方法:    __index
 ```
+
+#### 反射 - 实例
+```lua
+require("class")
+local a = class("a")
+
+function a:new()
+    self.x = 1
+end
+
+local a1 = a:new()
+-- 构造实例的反射对象
+local a1Info = skyClass.instanceInfo.Create(a1)
+
+-- 通过实例反射对象获取类反射对象
+local aInfo = a1Info:getClassInfo()
+
+-- 通过实例反射对象获取实例字段
+print("a1.x:",a1Info:getField("x"))
+-- 通过实例反射对象设置实例字段
+a1Info:setField("x",10)
+print("a1.x:",a1Info:getField("x"))
+-- 通过实例反射对象获取实例所有字段
+local allField = a1Info:getAllField()
+for key, value in pairs(allField) do
+    print("a1:",key,value)
+end
+```
+输出
+```
+a1.x:   1
+a1.x:   10
+a1:     _classInfo      table: 006b63a8
+a1:     x       10
+```
+**注意**：实例通过反射获取字段时，只能获取自身持有的所有字段
