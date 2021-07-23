@@ -75,12 +75,12 @@ local function _CreateClass(name, base)
 
     classMembers.new = classInfo._CreateInstance
 
-    classData.__index = classInfo._GetClassMember
-    classData.__newindex = classInfo._SetClassMember
-
     classMeta.__index = classData
 
-    setmetatable(classData, classData)
+    setmetatable(classData, {
+        __index = classInfo._GetClassMember,
+        __newindex = classInfo._SetClassMember,
+    })
     return classData
 end
 
