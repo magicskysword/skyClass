@@ -50,7 +50,7 @@ local function _CreateClass(name, base)
                 classMembers["ctor"] = value
                 return
             end
-            if string.sub(key, 1, 2) == "__" then
+            if string.find(key,"__") == 1 then
                 classMeta[key] = value
                 return
             end
