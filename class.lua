@@ -1,6 +1,7 @@
 local classes = {}
 
 local function _CreateClass(name, base)
+    ---@class class
     local classData = {}
 
     assert(classes[name] == nil,
@@ -33,18 +34,18 @@ local function _CreateClass(name, base)
         end
     end
 
-    function classInfo._GetClassMember(classType, key)
+    function classInfo._GetClassMember(_, key)
         if classMembers[key] ~= nil then
             return classMembers[key]
         else
-            if classInfo.base then
+            if base ~= nil then
                 local baseClassInfo = rawget(base, "_classInfo")
-                return baseClassInfo._GetClassMember(classInfo.base, key)
+                return baseClassInfo._GetClassMember(nil, key)
             end
         end
     end
 
-    function classInfo._SetClassMember(classType, key, value)
+    function classInfo._SetClassMember(_, key, value)
         if type(key) == "string" then
             if key == "new" then
                 classMembers["ctor"] = value
@@ -85,11 +86,12 @@ local function _CreateClass(name, base)
 end
 
 ---* Create a class
----@generic T
+---@generic T : class
+---@generic K : T
 ---@param name string
 ---@param base T
----@return table,T
----@overload fun(name : string) : table
+---@return K
+---@overload fun(name : string) : K
 function class(name, base)
     assert(type(name) == 'string', "class name is not a string.")
     return _CreateClass(name, base)
